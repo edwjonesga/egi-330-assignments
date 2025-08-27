@@ -1,0 +1,5 @@
+./src/VertexCoverAssignment.java
+./src/PartitionBruteForce.java
+./src/Main.java
+./src/Partition.java
+./test/MainTest.java

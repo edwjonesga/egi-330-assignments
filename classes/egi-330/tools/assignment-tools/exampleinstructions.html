@@ -1,0 +1,90 @@
+<h1 id="assignment-tasks">Assignment Tasks</h1>
+<p>${additional_instructions}</p>
+<h2 id="downloading-unzipping-and-running-the-assignment">Downloading, Unzipping, and Running the Assignment</h2>
+<h3 id="step-1-download-the-assignment-zip-file-from-your-course-portal-">Step 1: Download the assignment ZIP file from your course portal.</h3>
+<h3 id="step-2-unzip-the-file-into-a-directory-of-your-choice-">Step 2: Unzip the file into a directory of your choice.</h3>
+<p>You can use the following command in the terminal to unzip the file:</p>
+<pre><code class="lang-sh"><span class="hljs-selector-tag">unzip</span> <span class="hljs-selector-tag">the-assignment</span><span class="hljs-selector-class">.zip</span>
+</code></pre>
+<h3 id="step-3-open-a-terminal-command-prompt-on-windows-terminal-on-mac-linux-and-navigate-to-the-unzipped-directory-using-the-cd-command-">Step 3: Open a terminal (Command Prompt on Windows, Terminal on Mac/Linux) and navigate to the unzipped directory using the <code>cd</code> command.</h3>
+<h3 id="step-4-build-the-docker-image-using-the-following-command-">Step 4: Build the Docker image using the following command:</h3>
+<h4 id="windows-only-ensure-docker-desktop-is-running-">Windows only (Ensure Docker Desktop is running)</h4>
+<pre><code class="lang-sh"><span class="hljs-attribute">docker</span> build -t <span class="hljs-variable">${assignment_short_name}</span> .
+</code></pre>
+<h3 id="step-5-once-the-image-is-built-run-the-container-using-">Step 5: Once the image is built, run the container using:</h3>
+<h4 id="linux-mac-">Linux/Mac:</h4>
+<pre><code class="lang-sh">docker <span class="hljs-keyword">run</span><span class="bash"> -it --rm -v <span class="hljs-string">"<span class="hljs-variable">$(pwd)</span>"</span>:/workspace <span class="hljs-variable">${assignment_short_name}</span></span>
+</code></pre>
+<h4 id="windows-">Windows:</h4>
+<pre><code class="lang-sh">docker <span class="hljs-keyword">run</span><span class="bash"> -it --rm -v <span class="hljs-string">"%cd%"</span>:/workspace <span class="hljs-variable">${assignment_short_name}</span></span>
+</code></pre>
+<h3 id="step-6-get-most-recent-assignment-code-">Step 6: Get most recent assignment code.</h3>
+<p>Once your workspace is running run the following command to get the most recent code from github.
+Select your class then select the current assignment short name: ${assignment_short_name}</p>
+<pre><code class="lang-sh">refresh-assignment-<span class="hljs-keyword">files</span>.<span class="hljs-keyword">sh</span>
+</code></pre>
+<h2 id="using-the-installed-scripts">Using the Installed Scripts</h2>
+<p>After running the Docker container, you will have access to three scripts that are included in the Docker image:</p>
+<ol>
+<li><p><strong>compile.sh:</strong> This script compiles all code including <code>Main.java</code> and <code>MainTest.java</code> files.</p>
+<pre><code class="lang-sh"> <span class="hljs-selector-tag">compile</span><span class="hljs-selector-class">.sh</span>
+</code></pre>
+<p> It will compile the source files and ensure that your code is ready for testing.</p>
+</li>
+<li><p><strong>run-tests.sh:</strong> This script runs the JUnit tests in the <code>MainTest.java</code> file.</p>
+<pre><code class="lang-sh"> <span class="hljs-keyword">run</span><span class="bash">-tests.sh</span>
+</code></pre>
+<p> The results will be saved to a file named <code>test-results.txt</code>.</p>
+</li>
+<li><p><strong>prepare_to_submit.sh:</strong> This script prepares your assignment for submission by running all tests and creating a ZIP file containing your work.</p>
+<pre><code class="lang-sh"> <span class="hljs-selector-tag">prepare_to_submit</span><span class="hljs-selector-class">.sh</span>
+</code></pre>
+<p> If all tests pass, it will create a file named <code>Assignment.zip</code> in the <code>/workspace</code> directory, ready for submission.</p>
+</li>
+<li><p><strong>update-docker.sh:</strong> This script downloads a new Dockerfile to your workspace. This is sometimes necessary if updates are required.</p>
+<pre><code class="lang-sh"> <span class="hljs-keyword">update</span>-docker.<span class="hljs-keyword">sh</span>
+</code></pre>
+<p> You will need to exit, rebuild, and restart your Docker container after running this command.</p>
+</li>
+<li><p><strong>refresh-assignment-files.sh:</strong> This script downloads a fresh copy of the assignment files into your workspace to a directory named ${assignment_short_name}.</p>
+<pre><code class="lang-sh"> refresh-assignment-<span class="hljs-keyword">files</span>.<span class="hljs-keyword">sh</span>
+</code></pre>
+<p> You will need to copy the files you want to replace from the ${assignment_short_name} directory.</p>
+</li>
+</ol>
+<h1 id="getting-started-with-docker-for-your-assignment">Getting Started with Docker for Your Assignment</h1>
+<p>This assignment will guide you through creating a Docker-based environment. Follow the instructions below to set up Docker on your system and complete the tasks.</p>
+<h2 id="setting-up-docker">Setting Up Docker</h2>
+<h3 id="windows">Windows</h3>
+<ol>
+<li>Download Docker Desktop from <a href="https://www.docker.com/products/docker-desktop/">Docker’s official website</a>.</li>
+<li>Run the installer and follow the prompts.</li>
+<li>After installation, launch Docker Desktop and ensure it is running.</li>
+</ol>
+<h3 id="mac">Mac</h3>
+<ol>
+<li>Open Terminal.</li>
+<li>Install Homebrew if it is not already installed by running the following command:<pre><code class="lang-sh"> /<span class="hljs-keyword">bin/bash </span>-c <span class="hljs-string">"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</span>
+</code></pre>
+</li>
+<li>Run the following command to install Docker using Homebrew:<pre><code class="lang-sh"> <span class="hljs-keyword">brew </span><span class="hljs-keyword">install </span>--cask docker
+</code></pre>
+</li>
+<li>Start Docker from the command line:<pre><code class="lang-sh"> <span class="hljs-keyword">open</span> /Applications/Docker.<span class="hljs-keyword">app</span>
+</code></pre>
+</li>
+<li>Verify Docker installation by running:<pre><code class="lang-sh"> docker <span class="hljs-comment">--version</span>
+</code></pre>
+</li>
+</ol>
+<h3 id="linux">Linux</h3>
+<ol>
+<li>Open a terminal.</li>
+<li>Run the following commands:<pre><code class="lang-sh"> sudo apt-<span class="hljs-built_in">get</span> <span class="hljs-keyword">update</span>
+ sudo apt-<span class="hljs-built_in">get</span> install docker.io
+</code></pre>
+</li>
+<li>Verify Docker installation with:<pre><code class="lang-sh"> docker <span class="hljs-comment">--version</span>
+</code></pre>
+</li>
+</ol>

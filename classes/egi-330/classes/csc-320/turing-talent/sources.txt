@@ -1,0 +1,8 @@
+./src/BinaryAdder.java
+./src/BinaryDecrementer.java
+./src/BinaryIncrementer.java
+./src/Main.java
+./src/PalindromeChecker.java
+./src/TuringMachine.java
+./src/UnaryAdder.java
+./test/MainTest.java

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css" rel="stylesheet">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <style>
+      body { font-family: Roboto, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+      #container { display: flex; flex: 1; overflow: hidden; }
+      #fileList { width: 25%; border-right: 1px solid #ccc; overflow-y: auto; padding: 16px; background: #f9f9f9; position: relative; }
+      #editorPanel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+      #editor { flex: 1; overflow-y: auto; border-bottom: 1px solid #ccc; }
+      #filePathDisplay { font-size: 12px; color: #555; padding: 8px; background: #eee; }
+      #sidePanel { width: 300px; background: #fafafa; border-left: 1px solid #ccc; display: flex; flex-direction: column; padding: 16px; }
+      #commentBox { flex: 1; margin-bottom: 16px; height: 150px; }
+      #gradeInput { width: 100%; }
+      #loadingContainer { text-align: center; margin-bottom: 16px; }
+      #loadingBar { display: block; width: 100%; height: 6px; margin-bottom: 8px; }
+      .assignment-group, .student-group { margin-bottom: 8px; }
+      .collapsible { cursor: pointer; font-weight: bold; padding: 4px; border-radius: 4px; }
+      .collapsible:hover { background-color: #e0e0e0; }
+      .collapsed > .collapsible-content { display: none; }
+      .collapsible-content { padding-left: 16px; }
+      .file-link { cursor: pointer; padding: 4px 8px; display: block; border-radius: 4px; }
+      .file-link:hover { background-color: #e0e0e0; }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="fileList">
+        <div id="loadingContainer">
+          <div class="mdl-progress mdl-js-progress mdl-progress__indeterminate" id="loadingBar"></div>
+          <div>Loading assignments...</div>
+        </div>
+        <div id="files"></div>
+      </div>
+      <div id="editorPanel">
+        <div id="editor">Select a file to view its contents...</div>
+        <div id="filePathDisplay"></div>
+      </div>
+      <div id="sidePanel">
+        <textarea id="commentBox" class="mdl-textfield__input" placeholder="Comments for this file..."></textarea>
+        <input type="number" id="gradeInput" class="mdl-textfield__input" placeholder="Grade">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="saveGradeAndComments()">Save</button>
+      </div>
+    </div>
+
+    <script>
+      let editor = ace.edit("editor");
+      editor.setTheme("ace/theme/github");
+      editor.session.setMode("ace/mode/java");
+      let currentFile = null;
+
+      function toggleCollapse(element) {
+        element.classList.toggle("collapsed");
+      }
+
+      function loadFiles(fileList) {
+        const fileListElem = document.getElementById("files");
+        const loadingElem = document.getElementById("loadingContainer");
+        fileListElem.innerHTML = "";
+        loadingElem.style.display = "block";
+
+        const grouped = {};
+        fileList
+          .filter(file => !file.name.endsWith(".class"))
+          .forEach(file => {
+            if (!grouped[file.assignment]) grouped[file.assignment] = {};
+            if (!grouped[file.assignment][file.student]) grouped[file.assignment][file.student] = [];
+            grouped[file.assignment][file.student].push(file);
+          });
+
+        for (const assignment in grouped) {
+          const aDiv = document.createElement("div");
+          aDiv.className = "assignment-group collapsible-group";
+
+          const aHeader = document.createElement("div");
+          aHeader.className = "collapsible";
+          aHeader.textContent = assignment;
+          aHeader.onclick = () => toggleCollapse(aDiv);
+
+          const aContent = document.createElement("div");
+          aContent.className = "collapsible-content";
+
+          for (const student in grouped[assignment]) {
+            const sDiv = document.createElement("div");
+            sDiv.className = "student-group collapsible-group";
+
+            const sHeader = document.createElement("div");
+            sHeader.className = "collapsible";
+            sHeader.textContent = student;
+            sHeader.onclick = () => toggleCollapse(sDiv);
+
+            const sContent = document.createElement("div");
+            sContent.className = "collapsible-content";
+
+            grouped[assignment][student].forEach(file => {
+              const li = document.createElement("div");
+              li.className = "file-link";
+              li.textContent = file.name;
+              li.onclick = () => {
+                google.script.run.withSuccessHandler(content => {
+                  editor.setValue(content, -1);
+                  currentFile = file;
+                  document.getElementById("commentBox").value = file.comments || "";
+                  document.getElementById("filePathDisplay").textContent = "Path: " + file.fullPath;
+                }).getFileContent(file.path);
+              };
+              sContent.appendChild(li);
+            });
+
+            sDiv.appendChild(sHeader);
+            sDiv.appendChild(sContent);
+            aContent.appendChild(sDiv);
+          }
+
+          aDiv.appendChild(aHeader);
+          aDiv.appendChild(aContent);
+          fileListElem.appendChild(aDiv);
+        }
+
+        loadingElem.style.display = "none";
+      }
+
+      function saveGradeAndComments() {
+        const grade = document.getElementById("gradeInput").value;
+        const comments = document.getElementById("commentBox").value;
+        if (!currentFile) return;
+        google.script.run.saveGradeAndComments(currentFile, grade, comments, '<?!= folderId ?>');
+      }
+
+      google.script.run.withSuccessHandler(loadFiles).getAssignmentFiles('<?!= folderId ?>');
+    </script>
+  </body>
+</html>

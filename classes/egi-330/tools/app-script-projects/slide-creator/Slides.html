@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <title>Slide Generator</title>
+    <!-- Material Design Lite (CDN) -->
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <style>
+      body {
+        padding: 40px;
+        background: #f5f5f5;
+        font-family: "Roboto", sans-serif;
+      }
+
+      .container {
+        max-width: 700px;
+        margin: auto;
+        background: white;
+        padding: 32px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .mdl-textfield {
+        width: 100%;
+      }
+
+      .output {
+        margin-top: 24px;
+        font-size: 16px;
+      }
+
+      .success-link {
+        font-weight: bold;
+        color: #3f51b5;
+        text-decoration: none;
+      }
+
+      .error {
+        color: red;
+        white-space: pre-wrap;
+      }
+
+      .progress-container {
+        margin-top: 20px;
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h4 class="mdl-typography--title">📚 Generate Slides for the Week</h4>
+
+      <div class="mdl-textfield mdl-js-textfield">
+        <textarea class="mdl-textfield__input" type="text" rows="4" id="weekOutline"></textarea>
+        <label class="mdl-textfield__label" for="weekOutline">Week Outline...</label>
+      </div>
+
+      <div class="mdl-textfield mdl-js-textfield">
+        <textarea class="mdl-textfield__input" type="text" rows="6" id="chapterSummary"></textarea>
+        <label class="mdl-textfield__label" for="chapterSummary">Chapter Summary...</label>
+      </div>
+
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" type="text" id="slideUrl">
+        <label class="mdl-textfield__label" for="slideUrl">Slide Template URL...</label>
+      </div>
+
+      <br>
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="submitForm()">
+        🚀 Generate Slides
+      </button>
+
+      <!-- Progress Bar -->
+      <div id="progress" class="progress-container">
+        <div class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+      </div>
+
+      <div id="output" class="output"></div>
+    </div>
+
+    <script>
+      function submitForm() {
+        const weekOutline = document.getElementById("weekOutline").value;
+        const chapterSummary = document.getElementById("chapterSummary").value;
+        const slideUrl = document.getElementById("slideUrl").value;
+        const output = document.getElementById("output");
+        const progress = document.getElementById("progress");
+
+        output.innerHTML = "";
+        progress.style.display = "block";
+
+        google.script.run
+          .withSuccessHandler(function(resultUrl) {
+            progress.style.display = "none";
+            output.innerHTML = `✅ Slides generated! <br><a class="success-link" href="${resultUrl}" target="_blank">${resultUrl}</a>`;
+          })
+          .withFailureHandler(function(error) {
+            progress.style.display = "none";
+            output.innerHTML = `<div class="error">❌ Error generating slides:\n${error.message || JSON.stringify(error, null, 2)}</div>`;
+          })
+          .generateSlidesForWeek(weekOutline, chapterSummary, slideUrl);
+      }
+    </script>
+  </body>
+</html>

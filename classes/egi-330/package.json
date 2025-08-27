@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@preact/preset-vite": "^2.10.2",
+    "preact-app": "file:tools/scrolastic/preact-app",
+    "vite": "^7.0.6"
+  }
+}

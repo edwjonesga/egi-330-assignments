@@ -1,0 +1,22 @@
+[debug] [2025-07-28T19:14:13.516Z] ----------------------------------------------------------------------
+[debug] [2025-07-28T19:14:13.519Z] Command:       /home/eddiejinc/.config/nvm/versions/node/v22.17.1/bin/node /usr/local/bin/firebase projects:create scholastic
+[debug] [2025-07-28T19:14:13.519Z] CLI Version:   14.11.1
+[debug] [2025-07-28T19:14:13.519Z] Platform:      linux
+[debug] [2025-07-28T19:14:13.519Z] Node Version:  v22.17.1
+[debug] [2025-07-28T19:14:13.519Z] Time:          Mon Jul 28 2025 13:14:13 GMT-0600 (Mountain Daylight Time)
+[debug] [2025-07-28T19:14:13.519Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-28T19:14:13.522Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-28T19:14:13.523Z] > authorizing via signed-in user (edwjonesga@ga.ccu.edu)
+[debug] [2025-07-28T19:14:21.336Z] Checked if tokens are valid: true, expires at: 1753733625599
+[debug] [2025-07-28T19:14:21.337Z] Checked if tokens are valid: true, expires at: 1753733625599
+[debug] [2025-07-28T19:14:21.337Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects [none]
+[debug] [2025-07-28T19:14:21.337Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects {"projectId":"scholastic","name":"scholastic"}
+[debug] [2025-07-28T19:14:21.555Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects 409
+[debug] [2025-07-28T19:14:21.555Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects {"error":{"code":409,"message":"Requested entity already exists","status":"ALREADY_EXISTS"}}
+[debug] [2025-07-28T19:14:21.556Z] FirebaseError: Request to https://cloudresourcemanager.googleapis.com/v1/projects had HTTP Error: 409, Requested entity already exists
+    at responseToError (/usr/local/lib/node_modules/firebase-tools/lib/responseToError.js:52:12)
+    at RetryOperation._fn (/usr/local/lib/node_modules/firebase-tools/lib/apiv2.js:312:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[error] 
+[error] Error: Failed to create project because there is already a project with ID scholastic. Please try again with a unique project ID.

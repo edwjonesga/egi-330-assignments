@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css"
+    />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <style>
+      .container {
+        padding: 20px;
+        max-width: 800px;
+        margin: auto;
+      }
+      .mdl-textfield {
+        width: 100%;
+      }
+      .message {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        display: none;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .loader {
+        display: none;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mdl-shadow--4dp mdl-color--white">
+      <h4 class="mdl-typography--headline">Java Assignment Generator</h4>
+      <div class="mdl-textfield mdl-js-textfield">
+        <input
+          class="mdl-textfield__input"
+          type="text"
+          id="assignmentName"
+        />
+        <label class="mdl-textfield__label" for="assignmentName">
+          Assignment Name
+        </label>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield">
+        <input
+          class="mdl-textfield__input"
+          type="text"
+          id="assignmentShortName"
+        />
+        <label class="mdl-textfield__label" for="assignmentShortName">
+          Assignment Short Name
+        </label>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield">
+        <textarea
+          class="mdl-textfield__input"
+          type="text"
+          rows="6"
+          id="mainJava"
+        ></textarea>
+        <label class="mdl-textfield__label" for="mainJava">
+          Main Java Code
+        </label>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield">
+        <textarea
+          class="mdl-textfield__input"
+          type="text"
+          rows="6"
+          id="mainTestJava"
+        ></textarea>
+        <label class="mdl-textfield__label" for="mainTestJava">
+          Main Test Java Code
+        </label>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield">
+        <textarea
+          class="mdl-textfield__input"
+          type="text"
+          rows="4"
+          id="additionalInstructions"
+        ></textarea>
+        <label class="mdl-textfield__label" for="additionalInstructions">
+          Additional Instructions
+        </label>
+      </div>
+      <button
+        class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+        onclick="submitForm()"
+      >
+        Generate Assignment Package
+      </button>
+      <div class="loader" id="loader"></div>
+      <div id="successMessage" class="message success"></div>
+      <div id="errorMessage" class="message error"></div>
+    </div>
+    <script>
+      function submitForm() {
+        const assignmentName = document.getElementById("assignmentName").value;
+        const assignmentShortName =
+          document.getElementById("assignmentShortName").value;
+        const mainJava = document.getElementById("mainJava").value;
+        const mainTestJava = document.getElementById("mainTestJava").value;
+        const additionalInstructions = document.getElementById("additionalInstructions").value;
+
+        const spec = {
+          assignmentName: assignmentName,
+          assignment_short_name: assignmentShortName,
+          dockerAssignment: {
+            mainJava: mainJava,
+            mainTestJava: mainTestJava,
+          },
+          additional_instructions: additionalInstructions,
+        };
+
+        const loader = document.getElementById("loader");
+        const successMessage = document.getElementById("successMessage");
+        const errorMessage = document.getElementById("errorMessage");
+
+        loader.style.display = "block";
+        successMessage.style.display = "none";
+        errorMessage.style.display = "none";
+
+        google.script.run
+          .withSuccessHandler((result) => {
+            loader.style.display = "none";
+            // The result is now the URL to the quiz editor
+            successMessage.innerHTML = `Assignment saved! <a href="${result}" target="_blank">Click here to proceed to the Quiz Editor</a>`;
+            successMessage.style.display = "block";
+          })
+          .withFailureHandler((error) => {
+            loader.style.display = "none";
+            errorMessage.innerHTML = `Error: ${error}`;
+            errorMessage.style.display = "block";
+          })
+          .createCombinedBrightspaceAssignmentPackage(spec);
+      }
+    </script>
+  </body>
+</html>

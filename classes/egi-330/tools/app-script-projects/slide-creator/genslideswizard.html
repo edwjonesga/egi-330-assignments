@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+      .mdl-card{
+        width: 100%;
+      }
+      .container {
+        max-width: 100%;
+        margin: 40px auto;
+        padding: 30px;
+      }
+      @media (min-width: 960px) {
+        .container {
+          max-width: 960px;
+        }
+      }
+      textarea {
+        width: 100%;
+        height: 200px;
+        font-family: monospace;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      .btn-group {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .section {
+        display: none;
+        margin-top: 30px;
+      }
+      .progress {
+        visibility: hidden;
+        margin-top: 10px;
+      }
+      .error-box {
+        background-color: #f44336;
+        color: white;
+        padding: 16px;
+        margin-top: 16px;
+        border-radius: 8px;
+        font-weight: 500;
+      }
+      .json-editor-container {
+        margin-top: 20px;
+      }
+      .card {
+        margin-bottom: 20px;
+      }
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+      }
+      .card-content {
+        padding: 20px;
+        display: none;
+      }
+      .summary-view {
+        padding: 20px;
+      }
+      .delete-button {
+        color: #f44336;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container mdl-shadow--2dp mdl-color--white mdl-cell mdl-cell--12-col">
+      <h4 class="mdl-typography--title">Slide Generation Flow (Manual & Flexible)</h4>
+
+      <div id="errorContainer"></div>
+
+      <!-- Step 1 -->
+      <div id="step1" class="section">
+        <h5>Step 1: Input Parameters</h5>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <textarea id="weekOutline" class="mdl-textfield__input" rows="4"></textarea>
+          <label class="mdl-textfield__label" for="weekOutline">Week Outline</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <textarea id="chapterSummary" class="mdl-textfield__input" rows="4"></textarea>
+          <label class="mdl-textfield__label" for="chapterSummary">Chapter Summary</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input id="slideUrl" class="mdl-textfield__input" type="text">
+          <label class="mdl-textfield__label" for="slideUrl">Slide Deck URL</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input id="slideCount" class="mdl-textfield__input" type="number" value="45">
+          <label class="mdl-textfield__label" for="slideCount">Target Slide Count</label>
+        </div>
+        <div class="btn-group">
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="runGenerateOutline()">Generate Outline</button>
+        </div>
+        <div id="progress-outline" class="mdl-progress mdl-js-progress mdl-progress__indeterminate progress"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="step2" class="section">
+        <h5>Step 2: Generated Outline</h5>
+        <div id="outlineOutput" class="json-editor-container"></div>
+        <div class="btn-group">
+          <button class="mdl-button mdl-js-button mdl-button--accent" onclick="displayStep('step1')">Back</button>
+          <button class="mdl-button mdl-js-button mdl-button--raised" onclick="runCleanUpOutline()">Clean Up Outline</button>
+        </div>
+        <div id="progress-cleanup" class="mdl-progress mdl-js-progress mdl-progress__indeterminate progress"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div id="step3" class="section">
+        <h5>Step 3: Cleaned Outline</h5>
+        <div id="cleanedOutput" class="json-editor-container"></div>
+        <div class="btn-group">
+          <button class="mdl-button mdl-js-button mdl-button--accent" onclick="displayStep('step2')">Back</button>
+          <button class="mdl-button mdl-js-button mdl-button--raised" onclick="runAddLearningObjectives()">Add Learning Objectives</button>
+        </div>
+        <div id="progress-objectives" class="mdl-progress mdl-js-progress mdl-progress__indeterminate progress"></div>
+      </div>
+
+      <!-- Step 4 -->
+      <div id="step4" class="section">
+        <h5>Step 4: With Learning Objectives</h5>
+        <div id="objectivesOutput" class="json-editor-container"></div>
+        <div class="btn-group">
+          <button class="mdl-button mdl-js-button mdl-button--accent" onclick="displayStep('step3')">Back</button>
+          <button class="mdl-button mdl-js-button mdl-button--raised" onclick="runParseWithFallback()">Parse Outline</button>
+        </div>
+        <div id="progress-parse" class="mdl-progress mdl-js-progress mdl-progress__indeterminate progress"></div>
+      </div>
+
+      <!-- Step 5 -->
+      <div id="step5" class="section">
+        <h5>Step 5: Parsed Sections</h5>
+        <div id="parsedOutput" class="json-editor-container"></div>
+        <div class="btn-group">
+          <button class="mdl-button mdl-js-button mdl-button--accent" onclick="displayStep('step4')">Back</button>
+          <button class="mdl-button mdl-js-button mdl-button--raised" onclick="runGeneratePrompts()">Generate Prompts</button>
+        </div>
+        <div id="progress-prompts" class="mdl-progress mdl-js-progress mdl-progress__indeterminate progress"></div>
+      </div>
+
+      <!-- Step 6 -->
+      <div id="step6" class="section">
+        <h5>Step 6: Prompts</h5>
+        <div id="promptsOutput" class="json-editor-container"></div>
+        <div class="btn-group">
+          <button class="mdl-button mdl-js-button mdl-button--accent" onclick="displayStep('step5')">Back</button>
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="runGenerateSlides()">Generate Slides</button>
+        </div>
+        <div id="progress-slides" class="mdl-progress mdl-js-progress mdl-progress__indeterminate progress"></div>
+      </div>
+    </div>
+
+    <script>
+      let weekOutline, chapterSummary, slideUrl;
+      let data = {};
+
+      function showProgress(id) {
+        document.querySelectorAll(".progress").forEach(p => p.style.visibility = "hidden");
+        document.getElementById(id).style.visibility = "visible";
+        clearError();
+      }
+
+      function hideProgress(id) {
+        document.getElementById(id).style.visibility = "hidden";
+      }
+
+      function displayStep(stepId) {
+        document.querySelectorAll(".section").forEach(section => {
+          section.style.display = "none";
+        });
+        document.getElementById(stepId).style.display = "block";
+        clearError();
+      }
+
+      function showError(message) {
+        const errorContainer = document.getElementById("errorContainer");
+        errorContainer.innerHTML = `<div class="error-box">⚠️ ${message}</div>`;
+        errorContainer.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function clearError() {
+        document.getElementById("errorContainer").innerHTML = "";
+      }
+
+      function renderJsonEditor(containerId, jsonData) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        data[containerId] = jsonData;
+
+        const titleDiv = document.createElement("div");
+        titleDiv.classList.add("mdl-textfield", "mdl-js-textfield", "mdl-textfield--floating-label");
+        const titleInput = document.createElement("input");
+        titleInput.classList.add("mdl-textfield__input");
+        titleInput.type = "text";
+        titleInput.id = `${containerId}-title`;
+        titleInput.value = jsonData.title;
+        titleInput.addEventListener("change", (e) => {
+          jsonData.title = e.target.value;
+        });
+        const titleLabel = document.createElement("label");
+        titleLabel.classList.add("mdl-textfield__label");
+        titleLabel.htmlFor = `${containerId}-title`;
+        titleLabel.textContent = "Title";
+        titleDiv.appendChild(titleInput);
+        titleDiv.appendChild(titleLabel);
+        container.appendChild(titleDiv);
+
+        const sectionsDiv = document.createElement("div");
+        jsonData.sections.forEach((section, sectionIndex) => {
+          const sectionCard = document.createElement("div");
+          sectionCard.classList.add("mdl-card", "mdl-shadow--2dp", "card");
+
+          const sectionHeader = document.createElement("div");
+          sectionHeader.classList.add("mdl-card__title", "card-header");
+          const sectionTitle = document.createElement("h2");
+          sectionTitle.classList.add("mdl-card__title-text");
+          sectionTitle.textContent = section.title;
+          sectionHeader.appendChild(sectionTitle);
+          sectionCard.appendChild(sectionHeader);
+
+          const summaryView = document.createElement("div");
+          summaryView.classList.add("summary-view");
+          summaryView.innerHTML = `
+            <p><strong>Time Window:</strong> ${section.timeWindowStartMinute} - ${section.timeWindowEndMinute}</p>
+            <p><strong>Activities:</strong></p>
+            <ul>
+              ${section.activities ? section.activities.map(a => `<li>${a}</li>`).join("") : ""}
+            </ul>
+            <p><strong>Topics:</strong></p>
+            <ul>
+              ${section.topics ? section.topics.map(t => `<li>${t.title}</li>`).join("") : ""}
+            </ul>
+            <p><strong>Objectives:</strong></p>
+            <ul>
+              ${section.Objectives ? section.Objectives.map(o => `<li>${o}</li>`).join("") : ""}
+            </ul>
+          `;
+          sectionCard.appendChild(summaryView);
+
+          const sectionContent = document.createElement("div");
+          sectionContent.classList.add("mdl-card__supporting-text", "card-content");
+
+          const editableSectionTitle = document.createElement("h2");
+          editableSectionTitle.classList.add("mdl-card__title-text");
+          editableSectionTitle.textContent = section.title;
+          editableSectionTitle.contentEditable = true;
+          editableSectionTitle.addEventListener("blur", (e) => {
+            section.title = e.target.textContent;
+          });
+          sectionContent.appendChild(editableSectionTitle);
+
+          const deleteButton = document.createElement("button");
+          deleteButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--icon", "delete-button");
+          deleteButton.innerHTML = `<i class="material-icons">delete</i>`;
+          deleteButton.addEventListener("click", () => {
+            jsonData.sections.splice(sectionIndex, 1);
+            renderJsonEditor(containerId, jsonData);
+          });
+          sectionContent.appendChild(deleteButton);
+
+          // Add time window inputs
+          const timeWindowDiv = document.createElement("div");
+          const startTimeDiv = document.createElement("div");
+          startTimeDiv.classList.add("mdl-textfield", "mdl-js-textfield", "mdl-textfield--floating-label");
+          const startTimeInput = document.createElement("input");
+          startTimeInput.classList.add("mdl-textfield__input");
+          startTimeInput.type = "number";
+          startTimeInput.value = section.timeWindowStartMinute;
+          startTimeInput.addEventListener("change", (e) => {
+            section.timeWindowStartMinute = e.target.value;
+          });
+          const startTimeLabel = document.createElement("label");
+          startTimeLabel.classList.add("mdl-textfield__label");
+          startTimeLabel.textContent = "Start Time";
+          startTimeDiv.appendChild(startTimeInput);
+          startTimeDiv.appendChild(startTimeLabel);
+          timeWindowDiv.appendChild(startTimeDiv);
+
+          const endTimeDiv = document.createElement("div");
+          endTimeDiv.classList.add("mdl-textfield", "mdl-js-textfield", "mdl-textfield--floating-label");
+          const endTimeInput = document.createElement("input");
+          endTimeInput.classList.add("mdl-textfield__input");
+          endTimeInput.type = "number";
+          endTimeInput.value = section.timeWindowEndMinute;
+          endTimeInput.addEventListener("change", (e) => {
+            section.timeWindowEndMinute = e.target.value;
+          });
+          const endTimeLabel = document.createElement("label");
+          endTimeLabel.classList.add("mdl-textfield__label");
+          endTimeLabel.textContent = "End Time";
+          endTimeDiv.appendChild(endTimeInput);
+          endTimeDiv.appendChild(endTimeLabel);
+          timeWindowDiv.appendChild(endTimeDiv);
+          sectionContent.appendChild(timeWindowDiv);
+
+          // Add activities
+          if (section.activities) {
+            const activitiesDiv = document.createElement("div");
+            section.activities.forEach((activity, activityIndex) => {
+              const activityDiv = document.createElement("div");
+              activityDiv.style.display = "flex";
+              activityDiv.style.alignItems = "center";
+              const activityInput = document.createElement("textarea");
+              activityInput.value = activity;
+              activityInput.addEventListener("change", (e) => {
+                section.activities[activityIndex] = e.target.value;
+              });
+              activityDiv.appendChild(activityInput);
+              const deleteActivityButton = document.createElement("button");
+              deleteActivityButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--icon", "delete-button");
+              deleteActivityButton.innerHTML = `<i class="material-icons">delete</i>`;
+              deleteActivityButton.addEventListener("click", () => {
+                section.activities.splice(activityIndex, 1);
+                renderJsonEditor(containerId, jsonData);
+              });
+              activityDiv.appendChild(deleteActivityButton);
+              activitiesDiv.appendChild(activityDiv);
+            });
+            const addActivityButton = document.createElement("button");
+            addActivityButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--accent");
+            addActivityButton.innerHTML = "Add Activity";
+            addActivityButton.addEventListener("click", () => {
+              section.activities.push("");
+              renderJsonEditor(containerId, jsonData);
+            });
+            activitiesDiv.appendChild(addActivityButton);
+            sectionContent.appendChild(activitiesDiv);
+          }
+
+          // Add topics
+          if (section.topics) {
+            const topicsDiv = document.createElement("div");
+            section.topics.forEach((topic, topicIndex) => {
+              const topicCard = document.createElement("div");
+              topicCard.classList.add("mdl-card", "mdl-shadow--2dp", "card");
+
+              const topicHeader = document.createElement("div");
+              topicHeader.classList.add("mdl-card__title", "card-header");
+              const topicTitle = document.createElement("h3");
+              topicTitle.classList.add("mdl-card__title-text");
+              topicTitle.textContent = topic.title;
+              topicHeader.appendChild(topicTitle);
+              topicCard.appendChild(topicHeader);
+
+              const topicSummaryView = document.createElement("div");
+              topicSummaryView.classList.add("summary-view");
+              topicSummaryView.innerHTML = `
+                <ul>
+                  ${topic.details ? topic.details.map(d => `<li>${d}</li>`).join("") : ""}
+                </ul>
+              `;
+              topicCard.appendChild(topicSummaryView);
+
+              const topicContent = document.createElement("div");
+              topicContent.classList.add("mdl-card__supporting-text", "card-content");
+
+              const editableTopicTitle = document.createElement("h3");
+              editableTopicTitle.classList.add("mdl-card__title-text");
+              editableTopicTitle.textContent = topic.title;
+              editableTopicTitle.contentEditable = true;
+              editableTopicTitle.addEventListener("blur", (e) => {
+                topic.title = e.target.textContent;
+              });
+              topicContent.appendChild(editableTopicTitle);
+
+              const deleteTopicButton = document.createElement("button");
+              deleteTopicButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--icon", "delete-button");
+              deleteTopicButton.innerHTML = `<i class="material-icons">delete</i>`;
+              deleteTopicButton.addEventListener("click", () => {
+                section.topics.splice(topicIndex, 1);
+                renderJsonEditor(containerId, jsonData);
+              });
+              topicContent.appendChild(deleteTopicButton);
+
+              // Add details
+              if (topic.details) {
+                const detailsDiv = document.createElement("div");
+                topic.details.forEach((detail, detailIndex) => {
+                  const detailDiv = document.createElement("div");
+                  detailDiv.style.display = "flex";
+                  detailDiv.style.alignItems = "center";
+                  const detailInput = document.createElement("textarea");
+                  detailInput.value = detail;
+                  detailInput.addEventListener("change", (e) => {
+                    topic.details[detailIndex] = e.target.value;
+                  });
+                  detailDiv.appendChild(detailInput);
+                  const deleteDetailButton = document.createElement("button");
+                  deleteDetailButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--icon", "delete-button");
+                  deleteDetailButton.innerHTML = `<i class="material-icons">delete</i>`;
+                  deleteDetailButton.addEventListener("click", () => {
+                    topic.details.splice(detailIndex, 1);
+                    renderJsonEditor(containerId, jsonData);
+                  });
+                  detailDiv.appendChild(deleteDetailButton);
+                  detailsDiv.appendChild(detailDiv);
+                });
+                const addDetailButton = document.createElement("button");
+                addDetailButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--accent");
+                addDetailButton.innerHTML = "Add Detail";
+                addDetailButton.addEventListener("click", () => {
+                  topic.details.push("");
+                  renderJsonEditor(containerId, jsonData);
+                });
+                detailsDiv.appendChild(addDetailButton);
+                topicContent.appendChild(detailsDiv);
+              }
+              topicCard.appendChild(topicContent);
+              topicsDiv.appendChild(topicCard);
+            });
+            const addTopicButton = document.createElement("button");
+            addTopicButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--accent");
+            addTopicButton.innerHTML = "Add Topic";
+            addTopicButton.addEventListener("click", () => {
+              section.topics.push({ title: "New Topic", details: [] });
+              renderJsonEditor(containerId, jsonData);
+            });
+            topicsDiv.appendChild(addTopicButton);
+            sectionContent.appendChild(topicsDiv);
+          }
+
+          if (section.Objectives) {
+            const objectivesDiv = document.createElement("div");
+            section.Objectives.forEach((objective, objectiveIndex) => {
+              const objectiveDiv = document.createElement("div");
+              objectiveDiv.style.display = "flex";
+              objectiveDiv.style.alignItems = "center";
+              const objectiveInput = document.createElement("textarea");
+              objectiveInput.value = objective;
+              objectiveInput.addEventListener("change", (e) => {
+                section.Objectives[objectiveIndex] = e.target.value;
+              });
+              objectiveDiv.appendChild(objectiveInput);
+              const deleteObjectiveButton = document.createElement("button");
+              deleteObjectiveButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--icon", "delete-button");
+              deleteObjectiveButton.innerHTML = `<i class="material-icons">delete</i>`;
+              deleteObjectiveButton.addEventListener("click", () => {
+                section.Objectives.splice(objectiveIndex, 1);
+                renderJsonEditor(containerId, jsonData);
+              });
+              objectiveDiv.appendChild(deleteObjectiveButton);
+              objectivesDiv.appendChild(objectiveDiv);
+            });
+            const addObjectiveButton = document.createElement("button");
+            addObjectiveButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--accent");
+            addObjectiveButton.innerHTML = "Add Objective";
+            addObjectiveButton.addEventListener("click", () => {
+              section.Objectives.push("");
+              renderJsonEditor(containerId, jsonData);
+            });
+            objectivesDiv.appendChild(addObjectiveButton);
+            sectionContent.appendChild(objectivesDiv);
+          }
+
+          sectionCard.appendChild(sectionContent);
+          sectionsDiv.appendChild(sectionCard);
+        });
+        container.appendChild(sectionsDiv);
+
+        // Add event listeners for collapsing cards
+        const headers = document.querySelectorAll(".card-header");
+        headers.forEach(header => {
+          header.addEventListener("click", () => {
+            const summary = header.nextElementSibling;
+            const content = summary.nextElementSibling;
+            if (content.style.display === "block") {
+              content.style.display = "none";
+              summary.style.display = "block";
+            } else {
+              content.style.display = "block";
+              summary.style.display = "none";
+            }
+          });
+        });
+      }
+
+      function renderPrompts(containerId, prompts) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        data[containerId] = prompts;
+
+        const promptsDiv = document.createElement("div");
+        prompts.forEach((prompt, promptIndex) => {
+            const promptCard = document.createElement("div");
+            promptCard.classList.add("mdl-card", "mdl-shadow--2dp", "card");
+
+            const promptHeader = document.createElement("div");
+            promptHeader.classList.add("mdl-card__title", "card-header");
+            const promptTitle = document.createElement("h3");
+            promptTitle.classList.add("mdl-card__title-text");
+            promptTitle.textContent = "Prompt";
+            promptHeader.appendChild(promptTitle);
+            promptCard.appendChild(promptHeader);
+
+            const promptSummaryView = document.createElement("div");
+            promptSummaryView.classList.add("summary-view");
+            promptSummaryView.innerHTML = `<p>${prompt.substring(0, prompt.length>1000?1000:prompt.length)}...</p>`;
+            promptCard.appendChild(promptSummaryView);
+
+            const promptContent = document.createElement("div");
+            promptContent.classList.add("mdl-card__supporting-text", "card-content");
+
+            const editablePrompt = document.createElement("textarea");
+            editablePrompt.value = prompt;
+            editablePrompt.addEventListener("change", (e) => {
+                prompts[promptIndex] = e.target.value;
+            });
+            promptContent.appendChild(editablePrompt);
+
+            const deletePromptButton = document.createElement("button");
+            deletePromptButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--icon", "delete-button");
+            deletePromptButton.innerHTML = `<i class="material-icons">delete</i>`;
+            deletePromptButton.addEventListener("click", () => {
+                prompts.splice(promptIndex, 1);
+                renderPrompts(containerId, prompts);
+            });
+            promptContent.appendChild(deletePromptButton);
+            promptCard.appendChild(promptContent);
+            promptsDiv.appendChild(promptCard);
+        });
+        const addPromptButton = document.createElement("button");
+        addPromptButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--accent");
+        addPromptButton.innerHTML = "Add Prompt";
+        addPromptButton.addEventListener("click", () => {
+            prompts.push("");
+            renderPrompts(containerId, prompts);
+        });
+        promptsDiv.appendChild(addPromptButton);
+        container.appendChild(promptsDiv);
+
+        const headers = document.querySelectorAll(".card-header");
+        headers.forEach(header => {
+            header.addEventListener("click", () => {
+                const summary = header.nextElementSibling;
+                const content = summary.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                    summary.style.display = "block";
+                } else {
+                    content.style.display = "block";
+                    summary.style.display = "none";
+                }
+            });
+        });
+      }
+
+      window.onload = function () {
+        displayStep("step1");
+      };
+
+      function runGenerateOutline() {
+        weekOutline = document.getElementById("weekOutline").value;
+        chapterSummary = document.getElementById("chapterSummary").value;
+        slideUrl = document.getElementById("slideUrl").value;
+
+        showProgress("progress-outline");
+        google.script.run
+          .withSuccessHandler(result => {
+            hideProgress("progress-outline");
+            renderJsonEditor("outlineOutput", result);
+            displayStep("step2");
+          })
+          .withFailureHandler(err => {
+            hideProgress("progress-outline");
+            showError(err.message || "Error generating outline.");
+          })
+          .generateOutline(weekOutline, chapterSummary);
+      }
+
+      function runCleanUpOutline() {
+        let outline = data["outlineOutput"];
+        showProgress("progress-cleanup");
+        google.script.run
+          .withSuccessHandler(result => {
+            hideProgress("progress-cleanup");
+            renderJsonEditor("cleanedOutput", result);
+            displayStep("step3");
+          })
+          .withFailureHandler(err => {
+            hideProgress("progress-cleanup");
+            showError(err.message || "Error cleaning up outline.");
+          })
+          .cleanUpOutline(JSON.stringify(outline), weekOutline, chapterSummary);
+      }
+
+      function runAddLearningObjectives() {
+        let cleaned = data["cleanedOutput"];
+        showProgress("progress-objectives");
+        google.script.run
+          .withSuccessHandler(result => {
+            hideProgress("progress-objectives");
+            renderJsonEditor("objectivesOutput", result);
+            displayStep("step4");
+          })
+          .withFailureHandler(err => {
+            hideProgress("progress-objectives");
+            showError(err.message || "Error adding learning objectives.");
+          })
+          .addLearningObjectives(JSON.stringify(cleaned), chapterSummary);
+      }
+
+      function runParseWithFallback() {
+        let withObjectives = data["objectivesOutput"];
+        showProgress("progress-parse");
+        google.script.run
+          .withSuccessHandler(result => {
+            hideProgress("progress-parse");
+            renderJsonEditor("parsedOutput", result);
+            displayStep("step5");
+          })
+          .withFailureHandler(err => {
+            hideProgress("progress-parse");
+            showError(err.message || "Error parsing with fallback.");
+          })
+          .parseWithFallback(JSON.stringify(withObjectives));
+      }
+
+      function runGeneratePrompts() {
+        let parsed = data["parsedOutput"];
+        let sections = parsed.sections;
+        showProgress("progress-prompts");
+        google.script.run
+          .withSuccessHandler(result => {
+            hideProgress("progress-prompts");
+            renderPrompts("promptsOutput", result);
+            displayStep("step6");
+          })
+          .withFailureHandler(err => {
+            hideProgress("progress-prompts");
+            showError(err.message || "Error generating prompts.");
+          })
+          .generatePrompts(sections, chapterSummary);
+      }
+
+      function runGenerateSlides() {
+        let prompts = data["promptsOutput"];
+        let slideCount = document.getElementById("slideCount").value;
+        showProgress("progress-slides");
+        google.script.run
+          .withSuccessHandler(result => {
+            hideProgress("progress-slides");
+            alert("Slides created successfully!");
+          })
+          .withFailureHandler(err => {
+            hideProgress("progress-slides");
+            showError(err.message || "Error generating slides.");
+          })
+          .generateSlides(slideUrl, prompts, chapterSummary, slideCount);
+      }
+    </script>
+  </body>
+</html>
