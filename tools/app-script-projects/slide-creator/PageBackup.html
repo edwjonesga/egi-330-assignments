@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <?!= include('Styles'); ?>
+  </head>
+  <body>
+    <h1>Google Slides Utility & Colab Notebook Generator</h1>
+
+    <textarea id="jsonInput" rows="20" cols="50" placeholder="Enter your JSON data here..."></textarea><br>
+
+    <!-- Input for Deck URL or Drive folder -->
+    <input type="text" id="deckUrl" placeholder="Optional: Paste existing Slide Deck or Drive Folder URL"><br>
+    
+    <!-- Checkbox for extracting text only -->
+    <input type="checkbox" id="extractTextOnly"> Extract Slide Text Only<br>
+
+
+    <div id="link"></div>
+
+    <!-- Script section -->
+    <script>
+      function createOrUpdateSlides() {
+        var jsonInput = document.getElementById("jsonInput").value;
+        var deckUrl = document.getElementById("deckUrl").value;
+        document.getElementById("link").innerHTML = 'Generating...';
+        google.script.run.withSuccessHandler(displayLink)
+                         .createSlideDeckFromJSON(jsonInput, deckUrl);
+      }
+
+      function extractJSONOrText() {
+        var deckUrl = document.getElementById("deckUrl").value;
+        var extractTextOnly = document.getElementById("extractTextOnly").checked;
+        if (deckUrl) {
+          document.getElementById("link").innerHTML = extractTextOnly ? 'Extracting Text...' : 'Extracting JSON...';
+          if (extractTextOnly) {
+            google.script.run.withSuccessHandler(displayText)
+                             .extractSlideDeckText(deckUrl);
+          } else {
+            google.script.run.withSuccessHandler(displayJSON)
+                             .extractSlideDeckJSON(deckUrl);
+          }
+        } else {
+          document.getElementById("link").innerHTML = 'Please enter a deck URL.';
+        }
+      }
+
+      function createQuizFiles() {
+        var jsonInput = document.getElementById("jsonInput").value;
+        try {
+          var quizData = JSON.parse(jsonInput);
+          document.getElementById("link").innerHTML = 'Creating quiz files...';
+          google.script.run.withSuccessHandler(displayQuizFolderLink)
+                           .createQuizFiles(quizData.quiz);
+        } catch (e) {
+          document.getElementById("link").innerHTML = 'Error parsing JSON: ' + e.message;
+        }
+      }
+
+      function createColabNotebook() {
+        var folderUrl = document.getElementById("deckUrl").value;
+        console.log("folder url"+folderUrl);
+        if (folderUrl) {
+          document.getElementById("link").innerHTML = 'Generating Colab notebook...';
+          google.script.run.withSuccessHandler(displayNotebookLink).withFailureHandler(displayNotebookLink)
+                           .createColabNotebookFromFolder(folderUrl);
+        } else {
+          document.getElementById("link").innerHTML = 'Please enter a Drive folder URL.';
+        }
+      }
+
+      function displayLink(presentationUrl) {
+        document.getElementById("link").innerHTML = 
+          '<a href="' + presentationUrl + '" target="_blank">Download Slide Deck</a>';
+      }
+
+      function displayNotebookLink(notebookUrl) {
+        document.getElementById("link").innerHTML = 
+          '<a href="' + notebookUrl + '" target="_blank">Open Colab Notebook</a>';
+      }
+
+      function displayJSON(jsonData) {
+        document.getElementById("jsonInput").value = jsonData;
+        document.getElementById("link").innerHTML = 'JSON extracted successfully!';
+      }
+
+      function displayText(textData) {
+        document.getElementById("jsonInput").value = textData;
+        document.getElementById("link").innerHTML = 'Text extracted successfully!';
+      }
+
+      function displayQuizFolderLink(folderUrl) {
+        document.getElementById("link").innerHTML = 
+          '<a href="' + folderUrl + '" target="_blank">View Quiz Files</a>';
+      }
+      
+    </script>
+
+    <!-- Action buttons -->
+    <button onclick="createOrUpdateSlides()">Create/Update Slides</button>
+    <button onclick="extractJSONOrText()">Extract JSON/Text from Slide Deck</button>
+    <button onclick="createQuizFiles()">Create Quiz Files from Text/JSON</button>
+    <button onclick="createColabNotebook()">Generate Colab Notebook from Folder</button><br>
+
+    <a href="https://script.google.com/home/projects/1vBaj12IQXoscYATMu-cBWoi83aGCaY3fnczIqK221F5_C6YKVMumXa_r/edit" target="_blank">Edit Script</a>
+  </body>
+</html>

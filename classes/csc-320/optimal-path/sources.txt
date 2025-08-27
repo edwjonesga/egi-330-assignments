@@ -1,0 +1,7 @@
+./src/CoinChange.java
+./src/CoinChangeSolutionReconstruction.java
+./src/Knapsack.java
+./src/KnightShortestPath.java
+./src/Main.java
+./src/RodCutting.java
+./test/MainTest.java

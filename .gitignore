@@ -1,0 +1,5 @@
+tools/scrolastic/venv
+node_modules
+tools/scrolastic/public/bundle.js
+tools/scrolastic/public/bundle.js.LICENSE.txt
+tools/app-script-projects/slide-default-script/.clasp.json

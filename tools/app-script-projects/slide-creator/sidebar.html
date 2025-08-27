@@ -1,0 +1,11 @@
+<!-- Use template variables for attributes -->
+
+<script src="<?= local ? 'http://localhost:5000/bundle.js' : 'https://scrolastic.firebaseapp.com/bundle.js' ?>"></script>
+<chat-box
+  local="<?= local ? 'true' : 'false' ?>"
+  chat-id="<?= chatId ?>"
+  template-id="<?= templateId ?>">
+  <context>
+     <?=slidedeckcontents?>
+  </context>
+</chat-box>

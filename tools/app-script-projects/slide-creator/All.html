@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material Design Web App</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    main {
+      flex: 1 0 auto;
+    }
+    .container {
+      margin-top: 20px;
+    }
+    .sidenav {
+      width: 300px;
+    }
+    .menu-title {
+      font-weight: bold;
+      padding: 16px;
+      background: #f5f5f5;
+      margin-bottom: 10px;
+    }
+    .textarea {
+      width: 100%;
+      height: 200px;
+      resize: none;
+    }
+    .action-buttons {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Side Navigation -->
+  <ul id="slide-out" class="sidenav sidenav-fixed">
+    <li><div class="menu-title">Menu</div></li>
+    <li><a href="#!" onclick="switchPage('slides')"><i class="material-icons">slideshow</i> Slides Utility</a></li>
+    <li><a href="#!" onclick="switchPage('quiz')"><i class="material-icons">quiz</i> Quiz Generator</a></li>
+    <li><a href="#!" onclick="switchPage('assignment')"><i class="material-icons">assignment</i> Assignment Generator</a></li>
+    <li><a href="#!" onclick="switchPage('colab')"><i class="material-icons">code</i> Colab Notebook</a></li>
+    <li><a href="#!" onclick="switchPage('syntax')"><i class="material-icons">format_align_left</i> Syntax Examples</a></li>
+  </ul>
+
+  <!-- Main Content -->
+  <main>
+    <div class="container">
+      <!-- Slides Utility Section -->
+      <div id="slides" class="page">
+        <h4>Google Slides Utility</h4>
+        <textarea id="jsonInput" class="textarea" placeholder="Enter your JSON data here..."></textarea>
+        <input type="text" id="deckUrl" placeholder="Optional: Paste Slide Deck or Drive Folder URL" class="input-field">
+        <label>
+          <input type="checkbox" id="extractTextOnly">
+          <span>Extract Slide Text Only</span>
+        </label>
+        <div class="action-buttons">
+          <button class="btn" onclick="createOrUpdateSlides()">Create/Update Slides</button>
+          <button class="btn" onclick="extractJSONOrText()">Extract JSON/Text</button>
+        </div>
+        <div id="link"></div>
+      </div>
+
+      <!-- Quiz Generator Section -->
+      <div id="quiz" class="page" style="display: none;">
+        <h4>Quiz Generator</h4>
+        <textarea id="quizInput" class="textarea" placeholder="Enter Quiz JSON here..."></textarea>
+        <div class="action-buttons">
+          <button class="btn" onclick="createQuizFiles()">Generate Quiz Files</button>
+        </div>
+      </div>
+
+      <!-- Assignment Generator Section -->
+      <div id="assignment" class="page" style="display: none;">
+        <h4>Assignment Generator</h4>
+        <textarea id="assignmentInput" class="textarea" placeholder="Enter Assignment JSON here..."></textarea>
+        <div class="action-buttons">
+          <button class="btn" onclick="generateAssignment()">Generate Assignment</button>
+        </div>
+      </div>
+
+      <!-- Colab Notebook Section -->
+      <div id="colab" class="page" style="display: none;">
+        <h4>Colab Notebook Generator</h4>
+        <textarea id="colabInput" class="textarea" placeholder="Enter Test Case JSON here..."></textarea>
+        <input type="text" id="folderUrl" placeholder="Enter Drive Folder URL" class="input-field">
+        <div class="action-buttons">
+          <button class="btn" onclick="createColabNotebook()">Generate Colab Notebook</button>
+        </div>
+      </div>
+
+      <!-- Syntax Examples Section -->
+      <div id="syntax" class="page" style="display: none;">
+        <h4>Syntax Examples</h4>
+        <button class="btn" onclick="copyText('jsonSyntax')">Copy JSON Slide Syntax</button>
+        <pre id="jsonSyntax">{
+  "title": "Presentation Title",
+  ...
+}</pre>
+        <button class="btn" onclick="copyText('quizSyntax')">Copy Quiz Syntax</button>
+        <pre id="quizSyntax">{
+  "quiz": {
+    ...
+  }
+}</pre>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    // Initialize sidenav
+    document.addEventListener('DOMContentLoaded', () => {
+      M.Sidenav.init(document.querySelectorAll('.sidenav'));
+    });
+
+    // Switch page function
+    function switchPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
+      document.getElementById(pageId).style.display = 'block';
+    }
+
+    // Copy text to clipboard
+    function copyText(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Text copied to clipboard!');
+      });
+    }
+
+    // Functions for handling buttons (replace with actual script.run calls)
+    function createOrUpdateSlides() { console.log('Creating slides...'); }
+    function extractJSONOrText() { console.log('Extracting JSON or Text...'); }
+    function createQuizFiles() { console.log('Creating quiz files...'); }
+    function generateAssignment() { console.log('Generating assignment...'); }
+    function createColabNotebook() { console.log('Creating Colab notebook...'); }
+  </script>
+</body>
+</html>

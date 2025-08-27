@@ -1,0 +1,13 @@
+rules_version='2'
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /prompt_templates/{templateId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /attachment_codes/{code} {
+      allow read, write: if false;
+    }
+  }
+}

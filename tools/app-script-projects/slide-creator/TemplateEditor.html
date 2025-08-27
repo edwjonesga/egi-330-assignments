@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; }
+      .container { display: flex; }
+      .editor { flex-grow: 1; margin-right: 20px; }
+      .sidebar { width: 300px; border-left: 1px solid #ccc; padding-left: 20px; }
+      h1, h2 { color: #333; }
+      select, textarea, button { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+      textarea { height: 400px; }
+      button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+      button:hover { background-color: #45a049; }
+      #saveStatus { color: green; }
+      .btn-group { display: flex; gap: 2%; }
+      #saveButton { width: 88%; }
+      #resetButton { width: 10%; background-color: #f44336; }
+    </style>
+  </head>
+  <body>
+    <h1>Prompt Template Editor</h1>
+    <div class="container">
+      <div class="editor">
+        <h2>Select a Template to Edit</h2>
+        <select id="templateSelector">
+          <option value="">-- Select a Template --</option>
+        </select>
+        <textarea id="templateContent"></textarea>
+        <div class="btn-group">
+          <button id="saveButton">Save Template</button>
+          <button id="resetButton">Reset to Default</button>
+        </div>
+        <p id="saveStatus"></p>
+      </div>
+      <div class="sidebar">
+        <h2>Placeholders</h2>
+        <div id="documentation">
+          <p>Select a template to see its available placeholders.</p>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const selector = document.getElementById('templateSelector');
+        const contentArea = document.getElementById('templateContent');
+        const saveButton = document.getElementById('saveButton');
+        const saveStatus = document.getElementById('saveStatus');
+        const documentationPanel = document.getElementById('documentation');
+
+        let templates = {};
+        let documentation = {};
+
+        // Load templates and documentation on page load
+        google.script.run.withSuccessHandler(data => {
+          templates = data;
+          for (const key in templates) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            selector.appendChild(option);
+          }
+        }).getTemplates();
+
+        google.script.run.withSuccessHandler(data => {
+          documentation = data;
+        }).getTemplateDocumentation();
+
+        // Handle template selection
+        selector.addEventListener('change', () => {
+          const selectedTemplate = selector.value;
+          if (selectedTemplate) {
+            contentArea.value = templates[selectedTemplate];
+            updateDocumentation(selectedTemplate);
+          } else {
+            contentArea.value = '';
+            documentationPanel.innerHTML = '<p>Select a template to see its available placeholders.</p>';
+          }
+        });
+
+        // Handle save button click
+        saveButton.addEventListener('click', () => {
+          const selectedTemplate = selector.value;
+          if (selectedTemplate) {
+            const newContent = contentArea.value;
+            saveStatus.textContent = 'Saving...';
+            google.script.run.withSuccessHandler(() => {
+              saveStatus.textContent = 'Saved successfully!';
+              templates[selectedTemplate] = newContent; // Update local cache
+              setTimeout(() => { saveStatus.textContent = ''; }, 3000);
+            }).saveTemplate(selectedTemplate, newContent);
+          }
+        });
+
+        function updateDocumentation(templateName) {
+          const templateDoc = documentation[templateName];
+          if (templateDoc) {
+            let html = '<ul>';
+            for (const placeholder in templateDoc) {
+              html += `<li><strong>\${${placeholder}}</strong>: ${templateDoc[placeholder]}</li>`;
+            }
+            html += '</ul>';
+            documentationPanel.innerHTML = html;
+          } else {
+            documentationPanel.innerHTML = '<p>No documentation available for this template.</p>';
+          }
+        }
+
+        // Handle reset button click
+        document.getElementById('resetButton').addEventListener('click', () => {
+          const selectedTemplate = selector.value;
+          if (selectedTemplate) {
+            saveStatus.textContent = 'Resetting...';
+            google.script.run.withSuccessHandler(() => {
+              // After deleting, we need to get the default value
+              google.script.run.withSuccessHandler(defaultTemplate => {
+                templates[selectedTemplate] = defaultTemplate;
+                contentArea.value = defaultTemplate;
+                saveStatus.textContent = 'Template has been reset to default.';
+                setTimeout(() => { saveStatus.textContent = ''; }, 3000);
+              }).getPromptTemplate(selectedTemplate);
+            }).resetTemplateToDefault(selectedTemplate);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

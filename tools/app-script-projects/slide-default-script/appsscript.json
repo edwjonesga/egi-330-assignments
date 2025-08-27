@@ -1,0 +1,20 @@
+{
+  "timeZone": "America/Denver",
+  "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "SlideCreator",
+        "version": "0",
+        "libraryId": "1vBaj12IQXoscYATMu-cBWoi83aGCaY3fnczIqK221F5_C6YKVMumXa_r",
+        "developmentMode": true
+      }
+    ]
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/presentations.currentonly",
+    "https://www.googleapis.com/auth/script.container.ui",
+    "https://www.googleapis.com/auth/script.external_request"
+  ]
+}
